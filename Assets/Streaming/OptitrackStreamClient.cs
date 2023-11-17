@@ -8,7 +8,7 @@ using UnityEngine;
 
 public class OptitrackStreamClient : MonoBehaviour
 {
-    private string server_ipaddress = "172.26.98.224"; // Classroom computer's ipaddress
+    private string server_ipaddress = "172.26.9.92"; // Classroom computer's ipaddress
 
     private TcpClient socketConnection;     
     private Thread clientReceiveThread;
@@ -87,7 +87,7 @@ public class OptitrackStreamClient : MonoBehaviour
             }         
         }         
         catch (SocketException socketException) {             
-            Debug.Log("Socket exception: " + socketException);         
+            Debug.Log("Socket exception: " + socketException);       
         }     
     }
 
