@@ -1,6 +1,7 @@
 using System;
 using System.Collections; 
-using System.Collections.Generic; 
+using System.Collections.Generic;
+using System.Linq;
 using System.Net; 
 using System.Net.Sockets; 
 using System.Text; 
@@ -9,22 +10,35 @@ using UnityEngine;
 
 public class OptitrackStreamServer : MonoBehaviour
 {
+    public int port = 0;
     private TcpListener tcpListener;
     private Thread tcpListenerThread;
     private List<TcpClient> connectedTcpClient;
+    
     GameObject[] optitrackObjects;
     // Start is called before the first frame update
     void Start()
     {
+        if (port == 0)
+        {
+            Debug.LogWarning("Port is 0. Are you sure it got set correctly");
+        }
         optitrackObjects = GetOptiTrackObjects();
         connectedTcpClient = new List<TcpClient>();
         tcpListenerThread = new Thread (new ThreadStart(ListenForIncommingRequests));       
         tcpListenerThread.IsBackground = true;      
         tcpListenerThread.Start();
+        Debug.Log("Opening new socket. IP: " + GetLocalIPv4() + " Port: " + port.ToString());
+    }
+    public string GetLocalIPv4()
+    {
+        var host = Dns.GetHostEntry(Dns.GetHostName());
+        return host.AddressList[host.AddressList.Length - 1].ToString();
+        
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         SendOptiTrackObjectInfo();
     }
@@ -35,15 +49,16 @@ public class OptitrackStreamServer : MonoBehaviour
     private void ListenForIncommingRequests () {        
         try {           
             // Create listener on localhost port 8052.          
-            tcpListener = new TcpListener(IPAddress.Parse("0.0.0.0"), 8052);          
+            tcpListener = new TcpListener(IPAddress.Parse("0.0.0.0"), port);          
             tcpListener.Start();              
             Debug.Log("Server is listening");
             while(true){
                 connectedTcpClient.Add(tcpListener.AcceptTcpClient());
             }
         }       
-        catch (SocketException socketException) {           
-            Debug.Log("SocketException " + socketException.ToString());         
+        catch (SocketException socketException) {
+            Debug.LogError("SocketException " + socketException.ToString());
+            Debug.Log("This was probably because there's a socket open on this port. Try changing the port number.");
         }     
     }   
 
